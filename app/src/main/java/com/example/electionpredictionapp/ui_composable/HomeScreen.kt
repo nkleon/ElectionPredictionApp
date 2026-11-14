@@ -35,23 +35,27 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 fun PreviewHomeScreen()
 {
     ElectionPredictionAppTheme {
-        HomeScreen( {}, {})
+        HomeScreen( "John", {}, {})
     }
 }
 
 @Composable
-fun HomeScreen(onYourProfile: () -> Unit, onAboutApp: () -> Unit) {
+fun HomeScreen(userFirstName: String, onYourProfile: () -> Unit, onAboutApp: () -> Unit) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 3.dp) {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                tonalElevation = 10.dp
+            ) {
                 Row(
-                    Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 16.dp),
+                    Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Election Prediction", style = MaterialTheme.typography.titleLarge)
+                    Text("Election Prediction App", style = MaterialTheme.typography.titleLarge)
 
                     Box {
                         IconButton(onClick = { menuExpanded = true }) {
@@ -83,10 +87,10 @@ fun HomeScreen(onYourProfile: () -> Unit, onAboutApp: () -> Unit) {
     ) {
         innerPadding ->
         Column(
-            Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
+            Modifier.fillMaxSize().padding(innerPadding).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text("Welcome", style = MaterialTheme.typography.headlineMedium)
+            Text("Welcome, $userFirstName", style = MaterialTheme.typography.headlineMedium)
 
             Text("Activity 1", style = MaterialTheme.typography.titleLarge)
 

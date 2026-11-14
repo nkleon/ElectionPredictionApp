@@ -35,12 +35,8 @@ fun PreviewProfileScreen() {
         "John", "Doe",
         "Male", "15 January 1995",
         accountRole = "Administrator",
-        onBackClick = {
-            // Navigate back
-        },
-        onChangePasswordClick = {
-            // Navigate to change password screen
-        }
+        onBackClick = { },
+        onChangePasswordClick = { }
     )
 }
 
@@ -62,15 +58,10 @@ fun ProfileScreen(
                 Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
                 ProfileItem(label = "First Name", value = firstName)
-
                 ProfileItem(label = "Last Name", value = lastName)
-
                 ProfileItem(label = "Gender", value = gender)
-
                 ProfileItem(label = "Date of Birth", value = dateOfBirth)
-
                 ProfileItem(label = "Account Role", value = accountRole)
             }
 
@@ -90,9 +81,7 @@ fun ProfileItem(label: String, value: String) {
             label,
             color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium
         )
-
         Text(value, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodyLarge)
-
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
@@ -103,7 +92,7 @@ fun ProfileTopBar(title: String, onBackClick: () -> Unit, modifier: Modifier = M
         modifier,
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 30.dp
+        tonalElevation = 10.dp
     ) {
         Row(
             Modifier.statusBarsPadding().fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
@@ -117,7 +106,6 @@ fun ProfileTopBar(title: String, onBackClick: () -> Unit, modifier: Modifier = M
             }
             Text(
                 title, Modifier.padding(start = 12.dp),
-                fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.titleLarge,

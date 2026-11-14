@@ -8,7 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,31 +35,50 @@ fun PreviewAboutAppScreen()
 
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(onClick = onBack) {
-                Text("Back")
+    Scaffold(
+        topBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                tonalElevation = 10.dp
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Go back"
+                        )
+                    }
+
+                    Text(
+                        "About the app", Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             }
-
-            Text(
-                "About the app", Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.titleLarge
-            )
         }
-
+    ) { innerPadding ->
         Column(
-            Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(vertical = 20.dp)
         ) {
-            Text(
-                "University Election Prediction App",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text("Version number 0.0.1", style = MaterialTheme.typography.bodyLarge)
-            Text("Copyright \u00a9 2026.", style = MaterialTheme.typography.bodyMedium)
+            Column(
+                Modifier.fillMaxSize().padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    "University Election Prediction App",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Text("Version number 0.0.1", style = MaterialTheme.typography.bodyLarge)
+
+                Text("Copyright \u00a9 2026.", style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }

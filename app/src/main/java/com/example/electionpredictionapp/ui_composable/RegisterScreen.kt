@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -49,8 +50,10 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
 
-fun emptyRegisterScreenFunc(firstName: String, lastName: String, email: String, dateOfBirth: String, gender: String,  accountRole: String,
-           password: String){}
+fun emptyRegisterScreenFunc(
+    firstName: String, lastName: String, dateOfBirth: String, gender: String,
+    accountRole: String,  email: String, password: String
+){}
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
@@ -66,10 +69,10 @@ fun RegisterScreen(
     onRegister: (
         firstName: String,
         lastName: String,
-        email: String,
         dateOfBirth: String,
         gender: String,
         accountRole: String,
+        email: String,
         password: String
     ) -> Unit,
     onCancel: () -> Unit
@@ -89,226 +92,238 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    Column(
-        Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text("Register new account", style = MaterialTheme.typography.headlineSmall)
-
-        OutlinedTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First name") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last name") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
-
-        OutlinedButton(
-            onClick = { showDatePicker = true },
-            Modifier.fillMaxWidth()
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(dateOfBirth.ifBlank { "Select date of birth" })
-        }
+            Text("Register new account", style = MaterialTheme.typography.headlineSmall)
 
-        if (showDatePicker) {
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                dateOfBirth = Instant.ofEpochMilli(millis)
-                                    .atZone(ZoneOffset.UTC)
-                                    .toLocalDate()
-                                    .toString()
-                            }
-                            showDatePicker = false
-                        }
-                    ) {
-                        Text("OK")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text("Cancel")
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
-        }
-
-        Text("Gender", style = MaterialTheme.typography.titleMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Male", "Female").forEach { option ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = gender == option,
-                        onClick = { gender = option }
-                    )
-                    Text(option)
-                }
-            }
-        }
-
-        Box(Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                value = accountRole,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Account type") },
-                placeholder = { Text("Select account type") },
-                trailingIcon = {
-                    IconButton(onClick = { accountMenuExpanded = !accountMenuExpanded }) {
-                        Icon(
-                            imageVector = if (accountMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowUp,
-                            contentDescription = if (accountMenuExpanded) "Collapse" else "Expand"
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
 
-            Box(Modifier.matchParentSize().clickable { accountMenuExpanded = !accountMenuExpanded })
+            OutlinedTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-            DropdownMenu(
-                expanded = accountMenuExpanded,
-                onDismissRequest = { accountMenuExpanded = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                listOf("Candidate", "Supporter").forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            accountRole = option
-                            accountMenuExpanded = false
-                        }
-                    )
-                }
-            }
-        }
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordVisible) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = if (passwordVisible) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
-                    )
-                }
-            }
-        )
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (confirmPasswordVisible) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            trailingIcon = {
-                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(
-                        imageVector = if (confirmPasswordVisible) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
-                        contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
-                    )
-                }
-            }
-        )
-
-        error?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
             OutlinedButton(
-                onClick = onCancel,
-                modifier = Modifier.weight(1f)
+                onClick = { showDatePicker = true },
+                Modifier.fillMaxWidth()
             ) {
-                Text("Cancel")
+                Text(dateOfBirth.ifBlank { "Select date of birth" })
             }
 
-            Button(
-                onClick = {
-                    val parsedDate = try {
-                        LocalDate.parse(dateOfBirth)
-                    } catch (_: DateTimeParseException) {
-                        null
-                    } catch (_: IllegalArgumentException) {
-                        null
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    dateOfBirth = Instant.ofEpochMilli(millis)
+                                        .atZone(ZoneOffset.UTC)
+                                        .toLocalDate()
+                                        .toString()
+                                }
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Cancel")
+                        }
                     }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
 
-                    error = when {
-                        firstName.isBlank() || lastName.isBlank() ->
-                            "Enter your first and last name."
-                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
-                            "Enter a valid email address."
-                        parsedDate == null || parsedDate.isAfter(LocalDate.now()) ->
-                            "Enter a valid date of birth in YYYY-MM-DD format."
-                        gender.isBlank() ->
-                            "Select a gender."
-                        accountRole.isBlank() ->
-                            "Select an account type."
-                        password.isBlank() ->
-                            "Enter a password."
-                        password != confirmPassword ->
-                            "Passwords do not match."
-                        else -> null
+            Text("Gender", style = MaterialTheme.typography.titleMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("Male", "Female").forEach { option ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = gender == option,
+                            onClick = { gender = option }
+                        )
+                        Text(option)
                     }
+                }
+            }
 
-                    if (error == null) {
-                        onRegister(firstName.trim(), lastName.trim(), email.trim(), dateOfBirth.trim(), gender, accountRole, password)
+            Box(Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = accountRole,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Account type") },
+                    placeholder = { Text("Select account type") },
+                    trailingIcon = {
+                        IconButton(onClick = { accountMenuExpanded = !accountMenuExpanded }) {
+                            Icon(
+                                imageVector = if (accountMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowUp,
+                                contentDescription = if (accountMenuExpanded) "Collapse" else "Expand"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Box(
+                    Modifier.matchParentSize()
+                        .clickable { accountMenuExpanded = !accountMenuExpanded })
+
+                DropdownMenu(
+                    expanded = accountMenuExpanded,
+                    onDismissRequest = { accountMenuExpanded = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf("Candidate", "Supporter").forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                accountRole = option
+                                accountMenuExpanded = false
+                            }
+                        )
                     }
+                }
+            }
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
                 },
-                modifier = Modifier.weight(1f)
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirm password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (confirmPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
+                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                }
+            )
+
+            error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Register")
+                OutlinedButton(
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Cancel")
+                }
+
+                Button(
+                    onClick = {
+                        val parsedDate = try {
+                            LocalDate.parse(dateOfBirth)
+                        } catch (_: DateTimeParseException) {
+                            null
+                        } catch (_: IllegalArgumentException) {
+                            null
+                        }
+
+                        error = when {
+                            firstName.isBlank() || lastName.isBlank() ->
+                                "Enter your first and last name."
+                            !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                                "Enter a valid email address."
+                            parsedDate == null || parsedDate.isAfter(LocalDate.now()) ->
+                                "Enter a valid date of birth in YYYY-MM-DD format."
+                            gender.isBlank() ->
+                                "Select a gender."
+                            accountRole.isBlank() ->
+                                "Select an account type."
+                            password.isBlank() ->
+                                "Enter a password."
+                            password != confirmPassword ->
+                                "Passwords do not match."
+                            else -> null
+                        }
+
+                        if (error == null) {
+                            onRegister(
+                                firstName.trim(), lastName.trim(),
+                                dateOfBirth.trim(), gender.trim(),
+                                accountRole.trim(), email.trim(),
+                                password
+                            )
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Register")
+                }
             }
         }
     }
