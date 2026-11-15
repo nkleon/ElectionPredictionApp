@@ -30,9 +30,9 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun PreviewLoginScreen() {
+private fun PreviewLoginScreen() {
     ElectionPredictionAppTheme{
-        LoginScreen(onLogin = { email, password -> }, onRegister = { })
+        LoginScreen(onLogin = { _, _ -> }, onRegister = { })
     }
 }
 

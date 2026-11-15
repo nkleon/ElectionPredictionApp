@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewProfileScreen() {
+private fun PreviewProfileScreen() {
     ProfileScreen(
         "John", "Doe",
         "Male", "15 January 1995",
@@ -51,7 +51,7 @@ fun ProfileScreen(
     onChangePasswordClick: () -> Unit
 ) {
     Scaffold(
-        topBar = { ProfileTopBar(title = "User Profile", onBackClick = onBackClick) }
+        topBar = { MenuTopBar(title = "User Profile", onBackClick = onBackClick) }
     ) { innerPadding ->
         Column(Modifier.fillMaxSize().padding(innerPadding).padding(20.dp)) {
             Column(
@@ -75,7 +75,7 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileItem(label: String, value: String) {
+private fun ProfileItem(label: String, value: String) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             label,
@@ -87,7 +87,7 @@ fun ProfileItem(label: String, value: String) {
 }
 
 @Composable
-fun ProfileTopBar(title: String, onBackClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun MenuTopBar(title: String, onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier,
         color = MaterialTheme.colorScheme.surface,

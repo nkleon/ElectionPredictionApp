@@ -50,17 +50,16 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
 
-fun emptyRegisterScreenFunc(
+private fun emptyRegisterScreenCallback(
     firstName: String, lastName: String, dateOfBirth: String, gender: String,
     accountRole: String,  email: String, password: String
 ){}
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun PreviewRegisterScreen()
-{
+private fun PreviewRegisterScreen() {
     ElectionPredictionAppTheme{
-        RegisterScreen(::emptyRegisterScreenFunc, {})
+        RegisterScreen(::emptyRegisterScreenCallback, {})
     }
 }
 
