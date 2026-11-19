@@ -27,26 +27,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.electionpredictionapp.objects.User
+import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewProfileScreen() {
-    ProfileScreen(
-        "John", "Doe",
-        "Male", "15 January 1995",
-        accountRole = "Administrator",
-        onBackClick = { },
-        onChangePasswordClick = { }
+    val user = User(
+        "", "John", "Doe", "1995-01-15", "Male",
+        "Administrator", "jdoe@example.com"
     )
+    ElectionPredictionAppTheme {
+        ProfileScreen(
+            user,
+            onBackClick = { },
+            onChangePasswordClick = { }
+        )
+    }
 }
 
 @Composable
 fun ProfileScreen(
-    firstName: String,
-    lastName: String,
-    gender: String,
-    dateOfBirth: String,
-    accountRole: String,
+    user: User,
     onBackClick: () -> Unit,
     onChangePasswordClick: () -> Unit
 ) {
@@ -58,11 +60,12 @@ fun ProfileScreen(
                 Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                ProfileItem(label = "First Name", value = firstName)
-                ProfileItem(label = "Last Name", value = lastName)
-                ProfileItem(label = "Gender", value = gender)
-                ProfileItem(label = "Date of Birth", value = dateOfBirth)
-                ProfileItem(label = "Account Role", value = accountRole)
+                ProfileItem(label = "First Name", value = user.firstName)
+                ProfileItem(label = "Last Name", value = user.lastName)
+                ProfileItem(label = "Date of Birth", value = user.dateOfBirth)
+                ProfileItem(label = "Gender", value = user.gender)
+                ProfileItem(label = "Account Role", value = user.accountRole)
+                ProfileItem(label = "Email", value = user.email)
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

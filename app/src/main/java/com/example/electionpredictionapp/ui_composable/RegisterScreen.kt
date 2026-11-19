@@ -1,6 +1,5 @@
 package com.example.electionpredictionapp.ui_composable
 
-import android.content.res.Configuration
 import android.util.Patterns
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,7 @@ private fun emptyRegisterScreenCallback(
     accountRole: String,  email: String, password: String
 ){}
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(showBackground = true)
 @Composable
 private fun PreviewRegisterScreen() {
     ElectionPredictionAppTheme{

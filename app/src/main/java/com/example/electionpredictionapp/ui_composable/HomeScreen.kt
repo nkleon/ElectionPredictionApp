@@ -1,12 +1,12 @@
 package com.example.electionpredictionapp.ui_composable
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,20 +34,22 @@ import androidx.compose.ui.unit.dp
 import com.example.electionpredictionapp.objects.Survey
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(showBackground = true)
 @Composable
 private fun PreviewHomeScreen() {
+    val openSurveys = listOf(
+        Survey(name = "Survey 1"),
+        Survey(name = "Survey 2"),
+        Survey(name = "Survey 3")
+    )
     ElectionPredictionAppTheme {
         HomeScreen(
             userFirstName = "John",
             userAccountRole = "Supporter",
-            openSurveys = listOf(
-                Survey(name = "Survey 1"),
-                Survey(name = "Survey 2"),
-                Survey(name = "Survey 3")
-            ),
+            openSurveys = openSurveys,
             onUserProfile = {},
-            onAboutApp = {}
+            onAboutApp = {},
+            onLogout = {}
         )
     }
 }
@@ -58,21 +60,21 @@ fun HomeScreen(
     userAccountRole: String,
     onUserProfile: () -> Unit,
     onAboutApp: () -> Unit,
+    onLogout: () -> Unit,
     onUsers: (() -> Unit) = {},
     onPositions: (() -> Unit) = {},
     onSurveys: (() -> Unit) = {},
-    onViewOwnCandidateProfile: (() -> Unit) = {},
+    onViewOwnCandidacy: (() -> Unit) = {},
     onPredictions: (() -> Unit) = {},
     openSurveys: List<Survey> = emptyList(),
     onSelectOpenSurvey: (Survey) -> Unit = {},
-    onViewCandidateProfiles: () -> Unit = {}
+    onViewAllCandidacies: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
-            MenuTopBar("Election Prediction App", onUserProfile, onAboutApp)
+            MenuTopBar("Election Prediction App", onUserProfile, onAboutApp, onLogout)
         }
-    ) {
-            innerPadding ->
+    ) { innerPadding ->
         Column(
             Modifier.fillMaxSize().padding(innerPadding).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -82,16 +84,18 @@ fun HomeScreen(
             if (userAccountRole == "Admin") {
                 AdminHomeScreenBody(onUsers, onPositions, onSurveys)
             } else if (userAccountRole == "Candidate") {
-                CandidateHomeScreenBody(onViewOwnCandidateProfile, onPredictions)
+                CandidateHomeScreenBody(onViewOwnCandidacy, onPredictions)
             } else if (userAccountRole == "Supporter") {
-                SupporterHomeScreenBody(openSurveys, onSelectOpenSurvey, onViewCandidateProfiles)
+                SupporterHomeScreenBody(openSurveys, onSelectOpenSurvey, onViewAllCandidacies)
             }
         }
     }
 }
 
 @Composable
-private fun MenuTopBar(menuTitle: String, onUserProfile: () -> Unit, onAboutApp: () -> Unit) {
+private fun MenuTopBar(
+    menuTitle: String, onUserProfile: () -> Unit, onAboutApp: () -> Unit, onLogout: () -> Unit
+) {
     var hamburgerMenuExpanded by remember { mutableStateOf(false) }
 
     Surface(
@@ -121,11 +125,20 @@ private fun MenuTopBar(menuTitle: String, onUserProfile: () -> Unit, onAboutApp:
                             onUserProfile()
                         }
                     )
+
                     DropdownMenuItem(
                         text = { Text("About the app") },
                         onClick = {
                             hamburgerMenuExpanded = false
                             onAboutApp()
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Logout") },
+                        onClick = {
+                            hamburgerMenuExpanded = false
+                            onLogout()
                         }
                     )
                 }
@@ -136,14 +149,14 @@ private fun MenuTopBar(menuTitle: String, onUserProfile: () -> Unit, onAboutApp:
 
 @Composable
 private fun CandidateHomeScreenBody(
-    onViewOwnCandidateProfile: () -> Unit,
+    onViewOwnCandidacy: () -> Unit,
     onPredictions: () -> Unit,
 ) {
     Text("Candidates' Portal", style = MaterialTheme.typography.titleLarge)
 
     NavigationTile(
-        title = "View your profile",
-        onClick = onViewOwnCandidateProfile
+        title = "View your candidacy",
+        onClick = onViewOwnCandidacy
     )
     NavigationTile(
         title = "View current predictions",
@@ -197,7 +210,7 @@ private fun NavigationTile(
 private fun SupporterHomeScreenBody(
     surveys: List<Survey>,
     onSelectOpenSurvey: (Survey) -> Unit,
-    onViewCandidateProfiles: () -> Unit
+    onViewAllCandidacies: () -> Unit
 ) {
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -225,8 +238,12 @@ private fun SupporterHomeScreenBody(
         }
     }
 
+    HorizontalDivider()
+
+    Spacer(Modifier.height(10.dp))
+
     Surface(
-        onClick = onViewCandidateProfiles, Modifier.fillMaxWidth().height(72.dp),
+        onClick = onViewAllCandidacies, Modifier.fillMaxWidth().height(72.dp),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         border = BorderStroke(

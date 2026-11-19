@@ -1,6 +1,5 @@
 package com.example.electionpredictionapp.ui_composable
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(showBackground = true)
 @Composable
 private fun PreviewLoginScreen() {
     ElectionPredictionAppTheme{

@@ -31,23 +31,35 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.electionpredictionapp.objects.User
+import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewUsersScreen() {
-    ViewUsersScreen(
-        listOf(
-            User("", "User 1", "Apple", "1-1-2001",
-                "Male", "Candidate", "u1apple@example.edu"),
-            User("", "User 2", "Berry", "2-2-2002",
-                "Female", "Candidate", "u2berry@example.edu"),
-            User("", "User 3", "Cabbage", "3-3-2003",
-                "Male", "Supporter", "u3cabbage@example.edu"),
-            User("", "User 4", "Date", "4-4-2004",
-                "Female", "Supporter", "u4date@example.edu"),
+    val allUsers = listOf(
+        User(
+            "", "User 1", "Apple", "1-1-2001",
+            "Male", "Candidate", "u1apple@example.edu"
         ),
-        {}
+        User(
+            "", "User 2", "Berry", "2-2-2002",
+            "Female", "Candidate", "u2berry@example.edu"
+        ),
+        User(
+            "", "User 3", "Cabbage", "3-3-2003",
+            "Male", "Supporter", "u3cabbage@example.edu"
+        ),
+        User(
+            "", "User 4", "Date", "4-4-2004",
+            "Female", "Supporter", "u4date@example.edu"
+        )
     )
+    ElectionPredictionAppTheme {
+        ViewUsersScreen(
+            allUsers,
+            {}
+        )
+    }
 }
 
 @Composable
