@@ -36,7 +36,7 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewUsersScreen() {
-    val allUsers = listOf(
+    val sampleUsers = listOf(
         User(
             "", "User 1", "Apple", "1-1-2001",
             "Male", "Candidate", "u1apple@example.edu"
@@ -56,7 +56,7 @@ private fun PreviewViewUsersScreen() {
     )
     ElectionPredictionAppTheme {
         ViewUsersScreen(
-            allUsers,
+            sampleUsers,
             {}
         )
     }

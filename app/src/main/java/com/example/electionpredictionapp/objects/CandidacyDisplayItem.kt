@@ -5,5 +5,6 @@ data class CandidacyDisplayItem(
     val firstName: String = "",
     val lastName: String = "",
     val positionName: String = "",
-    val manifesto: String = ""
+    val manifesto: String = "",
+    val createdTimestamp: String = ""
 )

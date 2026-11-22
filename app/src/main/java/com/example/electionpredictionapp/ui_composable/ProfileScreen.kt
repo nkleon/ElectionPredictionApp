@@ -33,13 +33,13 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Preview(showBackground = true)
 @Composable
 private fun PreviewProfileScreen() {
-    val user = User(
+    val sampleUser = User(
         "", "John", "Doe", "1995-01-15", "Male",
         "Administrator", "jdoe@example.com"
     )
     ElectionPredictionAppTheme {
         ProfileScreen(
-            user,
+            sampleUser,
             onBackClick = { },
             onChangePasswordClick = { }
         )

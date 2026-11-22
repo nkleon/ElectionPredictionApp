@@ -48,19 +48,20 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewOwnCandidacyScreen() {
-    val positions = listOf(
+    val sampleCandidacy = Candidacy(
+        positionName = "President",
+        manifesto = "Build resilient, accessible software that respects user attention, " +
+                "favors clarity over cleverness, and scales cleanly across teams."
+    )
+    val samplePositions = listOf(
         Position(name = "Position1"),
         Position(name = "Position2"),
         Position(name = "Position3"),
     )
     ElectionPredictionAppTheme {
         ViewOwnCandidacyScreen(
-            Candidacy(
-                positionName = "President",
-                manifesto = "Build resilient, accessible software that respects user attention, " +
-                        "favors clarity over cleverness, and scales cleanly across teams."
-            ),
-            positions,
+            sampleCandidacy,
+            samplePositions,
             {_,_,_->},
             {}
         )
@@ -193,7 +194,7 @@ private fun EditCandidacyPopup(
             positions.find { it.name == candidacy.positionName } ?: positions.firstOrNull()
         )
     }
-    var manifesto by remember { mutableStateOf(candidacy.manifesto ?: "") }
+    var manifesto by remember { mutableStateOf(candidacy.manifesto) }
     var positionMenuExpanded by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismissDialog) {

@@ -20,8 +20,13 @@ import com.example.electionpredictionapp.ui_composable.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.Instant
+import java.time.LocalDate
 
 object AppRoutes {
     const val LOGIN = "login"
@@ -35,13 +40,10 @@ object AppRoutes {
     const val FILL_SURVEY = "fillSurvey"
     const val VIEW_ALL_CANDIDACIES = "viewAllCandidacies"
     const val VIEW_OWN_CANDIDACY = "viewOwnCandidacy"
-    // const val EDIT_OWN_CAND_PROFILE = "editOwnCandProfile"
     const val VIEW_PREDICTIONS = "viewPredictions"
     const val VIEW_USERS = "viewUsers"
     const val VIEW_POSITIONS = "viewPositions"
-    // const val NEW_POSITION = "newPosition"
     const val VIEW_SURVEYS = "viewSurveys"
-    // const val NEW_SURVEY = "newSurvey"
 }
 
 object UserRepository {
@@ -89,7 +91,6 @@ object SurveyRepository {
         return surveySnapshots.documents.map { doc ->
             val surveyId = doc.id
             val surveyName = doc.getString("name") ?: ""
-            val positionName = doc.getString("positionName") ?: ""
             val openStatus = doc.getString("openStatus") ?: ""
             val responseCountQuery = FirebaseInstances.firestoreInst
                 .collection("surveys")
@@ -102,17 +103,49 @@ object SurveyRepository {
             SurveyDisplayItem(
                 id = surveyId,
                 name = surveyName,
-                positionName = positionName,
                 openStatus = openStatus,
                 responseCount = responseCount
             )
         }
     }
 
-    suspend fun addSurvey(name: String, positionName: String, openStatus: String) {
+    suspend fun getUnansweredOpenSurveys(uid: String): List<SurveyDisplayItem> = coroutineScope {
+        val openSnapshots = FirebaseInstances.firestoreInst
+            .collection("surveys")
+            .whereEqualTo("openStatus", "Open")
+            .get()
+            .await()
+
+        openSnapshots.documents.map { doc ->
+            async {
+                val surveyId = doc.id
+                val surveyRef = FirebaseInstances.firestoreInst
+                    .collection("surveys")
+                    .document(surveyId)
+
+                val responseDoc = surveyRef
+                    .collection("responses")
+                    .document(uid)
+                    .get()
+                    .await()
+
+                if (responseDoc.exists()) {
+                    null
+                } else {
+                    SurveyDisplayItem(
+                        id = surveyId,
+                        name = doc.getString("name") ?: "",
+                        openStatus = doc.getString("openStatus") ?: "Open",
+                        responseCount = 0 // Not needed on the Supporter home screen
+                    )
+                }
+            }
+        }.awaitAll().filterNotNull()
+    }
+
+    suspend fun addSurvey(name: String, openStatus: String) {
         val surveyData = mapOf(
             "name" to name,
-            "positionName" to positionName,
             "openStatus" to openStatus
         )
         FirebaseInstances.firestoreInst.collection("surveys")
@@ -120,17 +153,123 @@ object SurveyRepository {
     }
 
     suspend fun updateSurvey(
-        surveyId: String, name: String, positionName: String, openStatus: String
+        surveyId: String, name: String, openStatus: String
     ) {
         val updates = mapOf(
             "name" to name,
-            "positionName" to positionName,
             "openStatus" to openStatus
         )
         FirebaseInstances.firestoreInst.collection("surveys")
             .document(surveyId).update(updates)
             .await()
     }
+
+    suspend fun submitSurveyResponse(
+        surveyId: String,
+        user: User,
+        response: SurveyResponse,
+        candidacies: List<CandidacyDisplayItem>
+    ) {
+        val userBirthyr = LocalDate.parse(user.dateOfBirth).year
+        val candidatesByPosition = candidacies.groupBy { it.positionName }
+            .mapValues { (_, list) ->
+                list.sortedBy { it.createdTimestamp } // Ascending order
+            }
+
+        val mappedCandidates = mutableMapOf<String, Int>()
+        for ((positionName, selectedCandidateName) in response.preferredCandidates!!) {
+            val positionCandidates = candidatesByPosition[positionName].orEmpty()
+
+            val fieldKey = mapPositionToFieldKey(positionName)
+            mappedCandidates[fieldKey] = mapSelectedCandidateCode(
+                selectedCandidateName = selectedCandidateName,
+                positionCandidates = positionCandidates
+            )
+        }
+
+        val responseData = buildMap<String, Any> {
+            put("birthyr", userBirthyr)
+            put("gender4", mapGender(user.gender))
+            put("newsint", mapInterestLevel(response.interestLevel))
+            put("presvote20post", mapPastParticipation(response.pastParticipation))
+            put("CC22_363", mapWillParticipate(response.willParticipate))
+            put("CC22_320d", mapLeadershipApproval(response.leadershipApproval))
+            put("CC22_320g", mapLeadershipApproval(response.leadershipApproval))
+            putAll(mappedCandidates)
+        }
+        FirebaseInstances.firestoreInst
+            .collection("surveys")
+            .document(surveyId)
+            .collection("responses")
+            .document(user.id)
+            .set(responseData)
+            .await()
+    }
+
+    private fun mapGender(value: String): Int = when (value.trim().lowercase()) {
+        "male" -> 1
+        "female" -> 2
+        else -> value.toIntOrNull() ?: 0
+    }
+
+    private fun mapInterestLevel(value: String): Int = when (value.trim().lowercase()) {
+        "most of the time" -> 1
+        "some of the time" -> 2
+        "only now and then" -> 3
+        "hardly at all" -> 4
+        "don't know" -> 7
+        else -> value.toIntOrNull() ?: 0
+    }
+
+    private fun mapPastParticipation(value: String): Int = when (value.trim().lowercase()) {
+        "yes" -> 5
+        "no" -> 6
+        else -> value.toIntOrNull() ?: 0
+    }
+
+    private fun mapWillParticipate(value: String): Int = when (value.trim().lowercase()) {
+        "yes, definitely" -> 1
+        "probably" -> 2
+        "no" -> 5
+        "undecided" -> 6
+        else -> value.toIntOrNull() ?: 0
+    }
+
+    private fun mapLeadershipApproval(value: String): Int = when (value.trim().lowercase()) {
+        "strongly approve" -> 1
+        "somewhat approve" -> 2
+        "somewhat disapprove" -> 3
+        "strongly disapprove" -> 4
+        "not sure" -> 5
+        else -> value.toIntOrNull() ?: 0
+    }
+
+    private fun mapSelectedCandidateCode(
+        selectedCandidateName: String,
+        positionCandidates: List<CandidacyDisplayItem>
+    ): Int {
+        val normalized = selectedCandidateName.trim()
+        val index = positionCandidates.indexOfFirst { candidacy ->
+            val fullName = "${candidacy.firstName} ${candidacy.lastName}".trim()
+            fullName.equals(normalized, ignoreCase = true)
+        }
+        if (index != -1) return index + 1
+
+        return when (normalized.trim().lowercase()) {
+            "other" -> 7
+            "i'm not sure" -> 8
+            "no one" -> 9
+            else -> 0
+        }
+    }
+
+    private fun mapPositionToFieldKey(positionName: String): String =
+        when (positionName.trim().lowercase()) {
+            "gov", "governor", "state governor" -> "CC22_366"
+            "sen", "senator", "state senator" -> "CC22_365"
+            // Fallback: lowercase camelCase or snake_case if an unmapped position is added
+            else -> positionName.trim().lowercase().replace(Regex("\\s+"), "_")
+        }
 }
 
 object CandidacyRepository {
@@ -145,12 +284,21 @@ object CandidacyRepository {
     }
 
     suspend fun saveOwnCandidacy(uid: String, positionName: String, manifesto: String) {
-        val data = mapOf(
-            "positionName" to positionName,
-            "manifesto" to manifesto
-        )
-        FirebaseInstances.firestoreInst.collection("candidacies")
-            .document(uid).set(data, SetOptions.merge()).await()
+        val docRef = FirebaseInstances.firestoreInst
+            .collection("candidacies")
+            .document(uid)
+        val exists = docRef.get().await().exists()
+        val now = Instant.now().toString()
+
+        val data = buildMap<String, Any> {
+            put("positionName", positionName)
+            put("manifesto", manifesto)
+            // put("updatedTimestamp", now)
+            if (!exists) {
+                put("createdTimestamp", now)
+            }
+        }
+        docRef.set(data, SetOptions.merge()).await()
     }
 
     suspend fun getAllCandidacies(): List<CandidacyDisplayItem> {
@@ -179,6 +327,40 @@ object CandidacyRepository {
     }
 }
 
+object PredictionRepository {
+    suspend fun getAllPredictions(): List<Prediction> {
+        val snapshot = FirebaseInstances.firestoreInst
+            .collection("prediction")
+            .get().await()
+
+        return snapshot.documents.map { doc ->
+            val rawShares = doc.get("shares") as? Map<*, *>
+            val parsedShares: Map<Int, Double> = rawShares?.mapNotNull { (k, v) ->
+                val keyInt = when (k) {
+                    is Int -> k
+                    is Long -> k.toInt()
+                    is String -> k.toIntOrNull()
+                    else -> null
+                }
+                val valDouble = when (v) {
+                    is Double -> v
+                    is Float -> v.toDouble()
+                    is Long -> v.toDouble()
+                    is Int -> v.toDouble()
+                    is Number -> v.toDouble()
+                    else -> null
+                }
+                if (keyInt != null && valDouble != null) keyInt to valDouble else null
+            }?.toMap() ?: emptyMap()
+
+            Prediction(
+                id = doc.id,
+                shares = parsedShares
+            )
+        }
+    }
+}
+
 @Composable
 fun AppNavigation(mainActivity: MainActivity) {
     val navController = rememberNavController()
@@ -195,6 +377,11 @@ fun AppNavigation(mainActivity: MainActivity) {
     var ownCandidacy by remember { mutableStateOf(Candidacy()) }
     var allCandidacies by remember { mutableStateOf<List<CandidacyDisplayItem>>(emptyList()) }
 
+    var openSurveys by remember { mutableStateOf<List<SurveyDisplayItem>>(emptyList()) }
+    var selectedOpenSurvey by remember { mutableStateOf<SurveyDisplayItem?>(null) }
+
+    var allPredictions by remember { mutableStateOf<List<Prediction>>(emptyList()) }
+
     DisposableEffect (Unit) {
         val listener = FirebaseAuth.AuthStateListener { uid = it.currentUser?.uid }
         FirebaseInstances.authInst.addAuthStateListener(listener)
@@ -203,6 +390,14 @@ fun AppNavigation(mainActivity: MainActivity) {
 
     LaunchedEffect(uid) {
         loggedInUser = uid?.let { UserRepository.getUser(it) }
+    }
+
+    LaunchedEffect(uid, loggedInUser?.accountRole) {
+        if (uid != null && loggedInUser?.accountRole == "Supporter") {
+            openSurveys = SurveyRepository.getUnansweredOpenSurveys(uid!!)
+        } else if (uid == null) {
+            openSurveys = emptyList()
+        }
     }
 
     NavHost(navController, AppRoutes.LOGIN) {
@@ -261,9 +456,12 @@ fun AppNavigation(mainActivity: MainActivity) {
                     { navController.navigate(AppRoutes.VIEW_POSITIONS) },
                     { navController.navigate(AppRoutes.VIEW_SURVEYS) },
                     { navController.navigate(AppRoutes.VIEW_OWN_CANDIDACY) },
-                    {},
-                    emptyList(),
-                    {},
+                    { navController.navigate(AppRoutes.VIEW_PREDICTIONS) },
+                    openSurveys,
+                    { survey ->
+                        selectedOpenSurvey = survey
+                        navController.navigate(AppRoutes.FILL_SURVEY)
+                    },
                     { navController.navigate(AppRoutes.VIEW_ALL_CANDIDACIES) }
                 )
             }
@@ -323,6 +521,37 @@ fun AppNavigation(mainActivity: MainActivity) {
             }
         }
 
+        composable(AppRoutes.FILL_SURVEY) {
+            LaunchedEffect(uid) {
+                if (uid != null) {
+                    if (allCandidacies.isEmpty()) {
+                        allCandidacies = CandidacyRepository.getAllCandidacies()
+                    }
+                    if (allPositions.isEmpty()) {
+                        allPositions = PositionRepository.getAllPositions()
+                    }
+                }
+            }
+
+            FillSurveyScreen(
+                candidacies = allCandidacies,
+                positions = allPositions,
+                onCancel = { navController.popBackStack() },
+                onSubmit = { surveyResponse ->
+                    coroutineScope.launch {
+                        SurveyRepository.submitSurveyResponse(
+                            selectedOpenSurvey!!.id,
+                            loggedInUser!!,
+                            surveyResponse,
+                            allCandidacies
+                        )
+                        openSurveys = openSurveys.filterNot { it.id == selectedOpenSurvey!!.id }
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
         composable(AppRoutes.VIEW_ALL_CANDIDACIES) {
             LaunchedEffect(uid) {
                 allCandidacies = if (uid != null) {
@@ -363,6 +592,25 @@ fun AppNavigation(mainActivity: MainActivity) {
             )
         }
 
+        composable(AppRoutes.VIEW_PREDICTIONS) {
+            LaunchedEffect(uid) {
+                if (uid != null) {
+                    if (allCandidacies.isEmpty()) {
+                        allCandidacies = CandidacyRepository.getAllCandidacies()
+                    }
+                    allPredictions = PredictionRepository.getAllPredictions()
+                } else {
+                    allPredictions = emptyList()
+                }
+            }
+
+            ViewPredictionsScreen(
+                candidates = allCandidacies,
+                predictions = allPredictions,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
         composable(AppRoutes.VIEW_USERS) {
             LaunchedEffect(uid) {
                 allUsers = if (uid != null) UserRepository.getAllUsers() else emptyList()
@@ -399,21 +647,19 @@ fun AppNavigation(mainActivity: MainActivity) {
             LaunchedEffect(uid) {
                 if (uid != null) {
                     allSurveys = SurveyRepository.getSurveyDisplayItems()
-                    allPositions = PositionRepository.getAllPositions()
                 }
             }
             ViewSurveysScreen(
                 allSurveys,
-                allPositions,
-                { name, positionName, openStatus ->
+                { name, openStatus ->
                     coroutineScope.launch {
-                        SurveyRepository.addSurvey(name, positionName, openStatus)
+                        SurveyRepository.addSurvey(name, openStatus)
                         allSurveys = SurveyRepository.getSurveyDisplayItems()
                     }
                 },
-                { surveyId, name, positionName, openStatus ->
+                { surveyId, name, openStatus ->
                     coroutineScope.launch {
-                        SurveyRepository.updateSurvey(surveyId, name, positionName, openStatus)
+                        SurveyRepository.updateSurvey(surveyId, name, openStatus)
                         allSurveys = SurveyRepository.getSurveyDisplayItems()
                     }
                 },

@@ -47,35 +47,36 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewAllCandidaciesScreen() {
+    val sampleCandidacies = listOf(
+        CandidacyDisplayItem(
+            id = "1",
+            firstName = "Amara",
+            lastName = "Okafor",
+            positionName = "President",
+            manifesto = "Transparent budget reporting every semester, " +
+                    "expanded student housing grants, and weekly open town halls."
+        ),
+        CandidacyDisplayItem(
+            id = "2",
+            firstName = "Liam",
+            lastName = "Chen",
+            positionName = "President",
+            manifesto = "24/7 library study access during exam weeks, " +
+                    "faster transit shuttle frequencies, and mental health peer support."
+        ),
+        CandidacyDisplayItem(
+            id = "3",
+            firstName = "Sofia",
+            lastName = "Reyes",
+            positionName = "Secretary",
+            manifesto = "Publish meeting minutes within 48 hours and " +
+                    "build an accessible archive of club funding decisions."
+        )
+    )
     ElectionPredictionAppTheme {
         ViewAllCandidaciesScreen(
             onBackClick = {},
-            candidacies = listOf(
-                CandidacyDisplayItem(
-                    id = "1",
-                    firstName = "Amara",
-                    lastName = "Okafor",
-                    positionName = "President",
-                    manifesto = "Transparent budget reporting every semester, " +
-                        "expanded student housing grants, and weekly open town halls."
-                ),
-                CandidacyDisplayItem(
-                    id = "2",
-                    firstName = "Liam",
-                    lastName = "Chen",
-                    positionName = "President",
-                    manifesto = "24/7 library study access during exam weeks, " +
-                            "faster transit shuttle frequencies, and mental health peer support."
-                ),
-                CandidacyDisplayItem(
-                    id = "3",
-                    firstName = "Sofia",
-                    lastName = "Reyes",
-                    positionName = "Secretary",
-                    manifesto = "Publish meeting minutes within 48 hours and " +
-                            "build an accessible archive of club funding decisions."
-                )
-            )
+            candidacies = sampleCandidacies
         )
     }
 }

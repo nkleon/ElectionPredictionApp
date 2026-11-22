@@ -43,36 +43,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.example.electionpredictionapp.objects.Position
 import com.example.electionpredictionapp.objects.SurveyDisplayItem
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewSurveysScreen() {
-    val allSurveys = listOf(
+    val sampleSurveys = listOf(
         SurveyDisplayItem(
             name = "Survey1",
-            positionName = "President",
             openStatus = "Closed"
         ),
         SurveyDisplayItem(
             name = "Survey2",
-            positionName = "Secretary",
             openStatus = "Open"
         )
     )
-    val allPositions = listOf(
-        Position(name = "Position1"),
-        Position(name = "Position2"),
-        Position(name = "Position3"),
-    )
     ElectionPredictionAppTheme {
         ViewSurveysScreen(
-            allSurveys,
-            allPositions,
-            { _,_,_->},
-            {_,_,_,_->},
+            sampleSurveys,
+            { _,_->},
+            {_,_,_->},
             {}
         )
     }
@@ -81,9 +72,8 @@ private fun PreviewViewSurveysScreen() {
 @Composable
 fun ViewSurveysScreen(
     surveys: List<SurveyDisplayItem>,
-    positions: List<Position> = emptyList(),
-    onAddSurvey: (String, String, String) -> Unit,
-    onEditSurvey: (String, String, String, String) -> Unit,
+    onAddSurvey: (String, String) -> Unit,
+    onEditSurvey: (String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var showPopupDialog by remember { mutableStateOf(false) }
@@ -110,13 +100,12 @@ fun ViewSurveysScreen(
             if (showPopupDialog) {
                 AddEditSurveyPopup(
                     initialSurvey = surveyToEdit,
-                    positions = positions,
                     onDismissDialog = { showPopupDialog = false },
-                    onSaveSurvey = { name, positionName, status ->
+                    onSaveSurvey = { name, status ->
                         if (surveyToEdit == null) {
-                            onAddSurvey(name, positionName, status)
+                            onAddSurvey(name, status)
                         } else {
-                            onEditSurvey(surveyToEdit!!.id, name, positionName, status)
+                            onEditSurvey(surveyToEdit!!.id, name, status)
                         }
                         showPopupDialog = false
                     }
@@ -134,7 +123,6 @@ fun ViewSurveysScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TableCell("Name", 160.dp, isHeader = true)
-                        TableCell("Position", 120.dp, isHeader = true)
                         TableCell("No. of responses", 150.dp, isHeader = true)
                         TableCell("Status", 120.dp, isHeader = true)
                         TableCell("Action", 100.dp, isHeader = true)
@@ -145,7 +133,6 @@ fun ViewSurveysScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             TableCell(survey.name, 160.dp)
-                            TableCell(survey.positionName, 120.dp)
                             TableCell(survey.responseCount.toString(), 150.dp)
                             TableCell(survey.openStatus, 120.dp)
 
@@ -213,26 +200,20 @@ private fun MenuTopBar(title: String, onBackClick: () -> Unit, modifier: Modifie
 
 @Composable
 private fun AddEditSurveyPopup(
-    initialSurvey: SurveyDisplayItem?, positions: List<Position>,
+    initialSurvey: SurveyDisplayItem?,
     onDismissDialog: () -> Unit,
-    onSaveSurvey: (name: String, positionName: String, openStatus: String) -> Unit,
+    onSaveSurvey: (name: String, openStatus: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val statusOptions = listOf("Open", "Closed")
 
     var name by remember { mutableStateOf(initialSurvey?.name ?: "") }
-    var selectedPosition by remember {
-        mutableStateOf(
-            positions.find { it.name == initialSurvey?.positionName } ?: positions.firstOrNull()
-        )
-    }
     var status by remember {
         mutableStateOf(
             initialSurvey?.openStatus?.takeIf { it in statusOptions } ?: statusOptions.first()
         )
     }
 
-    var positionMenuExpanded by remember { mutableStateOf(false) }
     var statusMenuExpanded by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismissDialog) {
@@ -253,42 +234,6 @@ private fun AddEditSurveyPopup(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Name") }, singleLine = true,
                 )
-
-                Box(Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selectedPosition?.name ?: "",
-                        onValueChange = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        label = { Text("Position") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Select position"
-                            )
-                        },
-                    )
-
-                    Box(
-                        Modifier.matchParentSize().clickable(enabled = positions.isNotEmpty()) {
-                            positionMenuExpanded = true
-                        }
-                    )
-                    DropdownMenu(
-                        expanded = positionMenuExpanded,
-                        onDismissRequest = { positionMenuExpanded = false }
-                    ) {
-                        positions.forEach { position ->
-                            DropdownMenuItem(
-                                text = { Text(position.name) },
-                                onClick = {
-                                    selectedPosition = position
-                                    positionMenuExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
 
                 Box(Modifier.fillMaxWidth()) {
                     OutlinedTextField(
@@ -329,11 +274,9 @@ private fun AddEditSurveyPopup(
                     }
 
                     TextButton(
-                        enabled = name.isNotBlank() && selectedPosition != null,
+                        enabled = name.isNotBlank() && status != null,
                         onClick = {
-                            selectedPosition?.let { pos ->
-                                onSaveSurvey(name.trim(), pos.name, status)
-                            }
+                            onSaveSurvey(name.trim(), status)
                         }
                     ) {
                         Text("Save")

@@ -45,13 +45,15 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Preview(showBackground = true)
 @Composable
 private fun PreviewViewPositionsScreen() {
-    val positions = listOf(
+    val samplePositions = listOf(
         Position(name = "Position1"),
         Position(name = "Position2"),
         Position(name = "Position3"),
     )
     ElectionPredictionAppTheme {
-        ViewPositionsScreen(positions, {}, {_,_->}, {})
+        ViewPositionsScreen(
+            samplePositions, {}, { _, _->}, {}
+        )
     }
 }
 

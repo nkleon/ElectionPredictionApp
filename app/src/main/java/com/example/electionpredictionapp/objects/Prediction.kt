@@ -2,9 +2,7 @@ package com.example.electionpredictionapp.objects
 
 import com.google.firebase.firestore.DocumentId
 
-data class Survey(
+data class Prediction(
     @DocumentId val id: String = "",
-    val name: String = "",
-    val openStatus: String = "Closed",
-    val positionId: String = "",
+    val shares: Map<Int, Double> = emptyMap()
 )

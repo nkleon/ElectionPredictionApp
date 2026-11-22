@@ -31,22 +31,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.electionpredictionapp.objects.Survey
+import com.example.electionpredictionapp.objects.SurveyDisplayItem
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewHomeScreen() {
-    val openSurveys = listOf(
-        Survey(name = "Survey 1"),
-        Survey(name = "Survey 2"),
-        Survey(name = "Survey 3")
+    val sampleOpenSurveys = listOf(
+        SurveyDisplayItem(name = "Survey 1"),
+        SurveyDisplayItem(name = "Survey 2"),
+        SurveyDisplayItem(name = "Survey 3")
     )
     ElectionPredictionAppTheme {
         HomeScreen(
             userFirstName = "John",
             userAccountRole = "Supporter",
-            openSurveys = openSurveys,
+            openSurveys = sampleOpenSurveys,
             onUserProfile = {},
             onAboutApp = {},
             onLogout = {}
@@ -66,8 +66,8 @@ fun HomeScreen(
     onSurveys: (() -> Unit) = {},
     onViewOwnCandidacy: (() -> Unit) = {},
     onPredictions: (() -> Unit) = {},
-    openSurveys: List<Survey> = emptyList(),
-    onSelectOpenSurvey: (Survey) -> Unit = {},
+    openSurveys: List<SurveyDisplayItem> = emptyList(),
+    onSelectOpenSurvey: (SurveyDisplayItem) -> Unit = {},
     onViewAllCandidacies: () -> Unit = {}
 ) {
     Scaffold(
@@ -208,8 +208,8 @@ private fun NavigationTile(
 
 @Composable
 private fun SupporterHomeScreenBody(
-    surveys: List<Survey>,
-    onSelectOpenSurvey: (Survey) -> Unit,
+    surveys: List<SurveyDisplayItem>,
+    onSelectOpenSurvey: (SurveyDisplayItem) -> Unit,
     onViewAllCandidacies: () -> Unit
 ) {
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -224,17 +224,22 @@ private fun SupporterHomeScreenBody(
 
         HorizontalDivider()
 
-        surveys.forEach { survey ->
-            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                Text(survey.name, modifier = Modifier.weight(1f))
-                Text("Fill",
-                    Modifier.weight(1f)
-                        .clickable { onSelectOpenSurvey(survey) }
-                        .padding(start = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+        if (surveys.isNotEmpty()) {
+            surveys.forEach { survey ->
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Text(survey.name, modifier = Modifier.weight(1f))
+                    Text("Fill",
+                        Modifier.weight(1f).padding(start = 8.dp)
+                            .clickable { onSelectOpenSurvey(survey) },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
+        } else {
+            Text(
+                "No open surveys",
+            )
         }
     }
 
