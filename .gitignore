@@ -1,9 +1,10 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/*.xml
+/.idea/*
+!.idea/inspectionProfiles/Project_Default.xml
+!.idea/runConfigurations.xml
+!.idea/.gitignore
 .DS_Store
 /build
 /captures
