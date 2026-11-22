@@ -1,4 +1,4 @@
-package com.example.electionpredictionapp.objects
+package com.example.electionpredictionapp.dataclasses
 
 data class SurveyDisplayItem (
     val id: String = "",

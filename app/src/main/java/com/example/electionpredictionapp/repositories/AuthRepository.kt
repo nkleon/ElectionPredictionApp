@@ -1,15 +1,10 @@
-package com.example.electionpredictionapp.auth
+package com.example.electionpredictionapp.repositories
 
 import com.example.electionpredictionapp.dependencyinjection.FirebaseInstances
 import com.google.firebase.auth.EmailAuthProvider
 
-class AuthRoutine {
-
-    fun userLogin(
-        email: String,
-        password: String,
-        onResult: (Boolean, String?) -> Unit
-    ) {
+object AuthRepository {
+    fun userLogin(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         FirebaseInstances.authInst.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -36,7 +31,6 @@ class AuthRoutine {
             onResult(false, "New passwords do not match")
             return
         }
-
         val user = FirebaseInstances.authInst.currentUser
         if (user != null && user.email != null) {
             val credential = EmailAuthProvider.getCredential(user.email!!, oldPass)
@@ -78,8 +72,7 @@ class AuthRoutine {
                         "email" to email,
                     )
                     FirebaseInstances.firestoreInst.collection("users")
-                        .document(user.uid)
-                        .set(userData)
+                        .document(user.uid).set(userData)
                         .addOnSuccessListener {
                             onResult(true, null)
                         }

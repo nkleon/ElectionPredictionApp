@@ -40,9 +40,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.electionpredictionapp.objects.CandidacyDisplayItem
-import com.example.electionpredictionapp.objects.Position
-import com.example.electionpredictionapp.objects.SurveyResponse
+import com.example.electionpredictionapp.dataclasses.CandidacyDisplayItem
+import com.example.electionpredictionapp.dataclasses.Position
+import com.example.electionpredictionapp.dataclasses.SurveyResponse
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true, uiMode = 32)

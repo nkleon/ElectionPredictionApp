@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.electionpredictionapp.objects.CandidacyDisplayItem
+import com.example.electionpredictionapp.dataclasses.CandidacyDisplayItem
 import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 
 @Preview(showBackground = true)
