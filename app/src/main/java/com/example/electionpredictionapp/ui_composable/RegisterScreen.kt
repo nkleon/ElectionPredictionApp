@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -65,13 +66,8 @@ private fun PreviewRegisterScreen() {
 @Composable
 fun RegisterScreen(
     onRegister: (
-        firstName: String,
-        lastName: String,
-        dateOfBirth: String,
-        gender: String,
-        accountRole: String,
-        email: String,
-        password: String
+        firstName: String, lastName: String, dateOfBirth: String, gender: String,
+        accountRole: String, email: String, password: String
     ) -> Unit,
     onCancel: () -> Unit
 ) {
@@ -95,9 +91,8 @@ fun RegisterScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+            Modifier.fillMaxSize().padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("Register new account", style = MaterialTheme.typography.headlineSmall)
@@ -185,7 +180,7 @@ fun RegisterScreen(
                     trailingIcon = {
                         IconButton(onClick = { accountMenuExpanded = !accountMenuExpanded }) {
                             Icon(
-                                imageVector = if (accountMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowUp,
+                                imageVector = if (accountMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = if (accountMenuExpanded) "Collapse" else "Expand"
                             )
                         }

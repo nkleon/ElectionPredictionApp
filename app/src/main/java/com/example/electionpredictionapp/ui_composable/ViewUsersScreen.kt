@@ -147,11 +147,7 @@ private fun MenuTopBar(title: String, onBackClick: () -> Unit, modifier: Modifie
         tonalElevation = 10.dp
     ) {
         Row(
-            Modifier
-                .statusBarsPadding()
-                .fillMaxWidth()
-                .height(64.dp)
-                .padding(horizontal = 4.dp),
+            Modifier.statusBarsPadding().fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {

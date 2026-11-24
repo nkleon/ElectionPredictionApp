@@ -49,12 +49,12 @@ import com.example.electionpredictionapp.ui.theme.ElectionPredictionAppTheme
 @Composable
 private fun PreviewFillSurveyScreen() {
     val sampleCandidacies = listOf(
-        CandidacyDisplayItem("", "John", "Smith", "Gov"),
-        CandidacyDisplayItem("", "Jane", "Doe", "Gov"),
-        CandidacyDisplayItem("", "Jack", "Cork", "Sen"),
-        CandidacyDisplayItem("", "Juli", "Crock", "Sen"),
+        CandidacyDisplayItem("C1", "John", "Smith", "Gov"),
+        CandidacyDisplayItem("C2", "Jane", "Doe", "Gov"),
+        CandidacyDisplayItem("C3", "Jack", "Cork", "Sen"),
+        CandidacyDisplayItem("C4", "Juli", "Crock", "Sen"),
     )
-    val samplePositions = listOf(Position("", "Gov"), Position("", "Sen"))
+    val samplePositions = listOf(Position("P1", "Gov"), Position("P2", "Sen"))
     ElectionPredictionAppTheme {
         FillSurveyScreen(
             sampleCandidacies, samplePositions, {}, { _->}
@@ -64,37 +64,20 @@ private fun PreviewFillSurveyScreen() {
 
 @Composable
 fun FillSurveyScreen(
-    candidacies: List<CandidacyDisplayItem>,
-    positions: List<Position>,
-    onCancel: () -> Unit,
-    onSubmit: (SurveyResponse) -> Unit
+    candidacies: List<CandidacyDisplayItem>, positions: List<Position>,
+    onCancel: () -> Unit, onSubmit: (SurveyResponse) -> Unit
 ) {
     val interestOptions = listOf(
-        "Most of the time",
-        "Some of the time",
-        "Only now and then",
-        "Hardly at all",
-        "Don't know"
+        "Most of the time", "Some of the time", "Only now and then",
+        "Hardly at all", "Don't know"
     )
     val lastElectionOptions = listOf("Yes", "No")
-    val intendParticipateOptions = listOf(
-        "Yes, definitely",
-        "Probably",
-        "No",
-        "Undecided"
-    )
+    val intendParticipateOptions = listOf("Yes, definitely", "Probably", "No", "Undecided")
     val approvalOptions = listOf(
-        "Strongly approve",
-        "Somewhat approve",
-        "Somewhat disapprove",
-        "Strongly disapprove",
-        "Not sure"
+        "Strongly approve", "Somewhat approve", "Somewhat disapprove",
+        "Strongly disapprove", "Not sure"
     )
-    val nonCandidateOptions = listOf(
-        "Other",
-        "I'm not sure",
-        "No one"
-    )
+    val nonCandidateOptions = listOf("Other", "I'm not sure", "No one")
 
     var interestLevel by remember { mutableStateOf<String?>(null) }
     var pastParticipation by remember { mutableStateOf<String?>(null) }
@@ -107,15 +90,10 @@ fun FillSurveyScreen(
             candidacies.any { it.positionName == position.name }
         }
     }
-    val isFormValid by remember {
-        derivedStateOf {
-            interestLevel != null && pastParticipation != null &&
-                    willParticipate != null && leadershipApproval != null &&
-                    positionsWithCandidates.all { position ->
-                        preferredCandidates[position.name] != null
-                    }
-        }
-    }
+    val isFormValid = interestLevel != null && pastParticipation != null && willParticipate != null &&
+            leadershipApproval != null && positions.isNotEmpty() && positions.all { position ->
+                preferredCandidates[position.name] != null
+            }
 
     Scaffold(
         topBar = { MenuTopBar(title = "Fill Survey", onBackClick = onCancel) }
@@ -218,11 +196,8 @@ fun FillSurveyScreen(
 
 @Composable
 private fun RadioQuestionSection(
-    question: String,
-    options: List<String>,
-    selectedOption: String?,
-    onOptionSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    question: String, options: List<String>, selectedOption: String?,
+    onOptionSelected: (String) -> Unit, modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth().selectableGroup()) {
         Text(

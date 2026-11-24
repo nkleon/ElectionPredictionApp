@@ -40,6 +40,18 @@ fun AppNavigation(mainActivity: MainActivity) {
 
     var allPredictions by remember { mutableStateOf<List<Prediction>>(emptyList()) }
 
+    fun clearSessionState() {
+        loggedInUser = null
+        allUsers = emptyList()
+        allPositions = emptyList()
+        allSurveys = emptyList()
+        ownCandidacy = Candidacy()
+        allCandidacies = emptyList()
+        openSurveys = emptyList()
+        selectedOpenSurvey = null
+        allPredictions = emptyList()
+    }
+
     DisposableEffect (Unit) {
         val listener = FirebaseAuth.AuthStateListener { uid = it.currentUser?.uid }
         FirebaseInstances.authInst.addAuthStateListener(listener)
@@ -163,18 +175,21 @@ fun AppNavigation(mainActivity: MainActivity) {
         }
 
         composable(AppRoutes.LOGOUT) {
-            AuthRepository.userLogout { success, error ->
-                if (success) {
-                    navController.navigate(AppRoutes.LOGIN) {
-                        popUpTo(AppRoutes.HOME) { inclusive = true }
-                        launchSingleTop = true
+            LaunchedEffect(uid) {
+                AuthRepository.userLogout { success, error ->
+                    if (success) {
+                        clearSessionState()
+                        navController.navigate(AppRoutes.LOGIN) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    } else {
+                        Toast.makeText(
+                            mainActivity,
+                            error ?: "Logout failed",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                } else {
-                    Toast.makeText(
-                        mainActivity,
-                        error ?: "Logout failed",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
         }
