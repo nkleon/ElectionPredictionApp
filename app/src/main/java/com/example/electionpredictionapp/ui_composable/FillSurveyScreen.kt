@@ -77,7 +77,7 @@ fun FillSurveyScreen(
         "Strongly approve", "Somewhat approve", "Somewhat disapprove",
         "Strongly disapprove", "Not sure"
     )
-    val nonCandidateOptions = listOf("Other", "I'm not sure", "No one")
+    // val nonCandidateOptions = listOf("Other", "I'm not sure", "No one")
 
     var interestLevel by remember { mutableStateOf<String?>(null) }
     var pastParticipation by remember { mutableStateOf<String?>(null) }
@@ -147,7 +147,7 @@ fun FillSurveyScreen(
                         val realCandidates = candidacies
                             .filter { it.positionName == position.name }
                             .map { "${it.firstName} ${it.lastName}".trim() }
-                        realCandidates + nonCandidateOptions
+                        realCandidates// + nonCandidateOptions
                     }
                     RadioQuestionSection(
                         question = "Who is your preferred candidate for ${position.name}?",

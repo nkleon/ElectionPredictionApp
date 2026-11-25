@@ -74,7 +74,7 @@ private fun PreviewViewPredictionsScreen() {
     )
     val samplePredictions = listOf(
         Prediction(
-            id = "President",
+            id = "president",
             shares = mapOf(
                 1 to 0.44,
                 2 to 0.31,
@@ -84,7 +84,7 @@ private fun PreviewViewPredictionsScreen() {
             )
         ),
         Prediction(
-            id = "Secretary",
+            id = "secretary",
             shares = mapOf(
                 1 to 0.52,
                 2 to 0.25,
@@ -95,29 +95,18 @@ private fun PreviewViewPredictionsScreen() {
         )
     )
     ElectionPredictionAppTheme {
-        ViewPredictionsScreen(
-            candidates = sampleCandidates,
-            predictions = samplePredictions,
-            onBackClick = {}
-        )
+        ViewPredictionsScreen(sampleCandidates, samplePredictions, {})
     }
 }
 
 @Composable
 fun ViewPredictionsScreen(
-    candidates: List<CandidacyDisplayItem>,
-    predictions: List<Prediction>,
+    candidates: List<CandidacyDisplayItem>, predictions: List<Prediction>,
     onBackClick: () -> Unit
 ) {
-    val nonCandidateKeyMap = remember {
-        listOf(
-            7 to "Other",
-            8 to "I'm not sure",
-            9 to "No one"
-        )
-    }
+    // val nonCandidateKeyMap = remember { listOf(7 to "Other", 8 to "I'm not sure", 9 to "No one") }
     val predictionsByPosition = remember(predictions) {
-        predictions.associateBy { it.id }
+        predictions.associateBy { it -> it.id.replaceFirstChar { it.uppercaseChar() } }
     }
 
     val groupedCandidates = remember(candidates) {
@@ -155,16 +144,16 @@ fun ViewPredictionsScreen(
                 val candidateSharesById = indexedCandidates.associate { (candidate, share) ->
                     candidate.id to share
                 }
-
+/*
                 val nonCandidateShares = nonCandidateKeyMap.mapNotNull { (key, label) ->
                     shareMap[key]?.let { label to it.toFloat() }
                 }
-
+*/
                 PositionProportionCard(
                     positionName = position,
                     candidates = indexedCandidates.map { it.first },
                     candidateSharesById = candidateSharesById,
-                    nonCandidateShares = nonCandidateShares
+                    // nonCandidateShares = nonCandidateShares
                 )
             }
         }
@@ -176,7 +165,7 @@ private fun PositionProportionCard(
     positionName: String,
     candidates: List<CandidacyDisplayItem>,
     candidateSharesById: Map<String, Float>,
-    nonCandidateShares: List<Pair<String, Float>>,
+    // nonCandidateShares: List<Pair<String, Float>>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -209,17 +198,17 @@ private fun PositionProportionCard(
                 )
             }
 
-            if (candidates.isNotEmpty() && nonCandidateShares.isNotEmpty()) {
+            if (candidates.isNotEmpty() /*&& nonCandidateShares.isNotEmpty()*/) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
             }
-
+/*
             nonCandidateShares.forEach { (label, share) ->
                 ProportionRow(
                     label = label,
                     share = share,
                     isNonCandidate = true
                 )
-            }
+            }*/
         }
     }
 }
